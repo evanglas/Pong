@@ -5,4 +5,11 @@ canvas {
 
 body {
     margin: 0px;
+    /* display: flex; */
+    justify-content: center;
+}
+
+#canvasDiv {
+    display: flex;
+    justify-content: center;
 }
