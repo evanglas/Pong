@@ -1,12 +1,13 @@
 canvas {
     border: 1px solid #d3d3d3;
-    background-color: #f1f1f1;
+    background-color: #000000;
 }
 
 body {
     margin: 0px;
     /* display: flex; */
     justify-content: center;
+    overflow: hidden;
 }
 
 #canvasDiv {
