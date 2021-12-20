@@ -10,12 +10,7 @@ let paddleHeight = 90;
 let paddleWidth = 10;
 
 function preGame() {
-    title = new score(canvasWidth / 2 - 40, 40, 1);
-    description = new score(canvasWidth / 2 + 40, 40, 2);
-    onebox = new rectangle(2, canvasHeight, "white", canvasWidth / 2, 0, "line");
-    twoBox = new rectangle(2, canvasHeight, "white", canvasWidth / 2, 0, "line");
-    onebox = new text(canvasWidth / 2 + 40, 40, 2);
-    twoBox = new text(canvasWidth / 2 + 40, 40, 2);
+    myGameArea.homePage();
 }
 
 function loadGame() {
@@ -30,6 +25,55 @@ function loadGame() {
 
 var myGameArea = {
     canvas : document.createElement("canvas"),
+    homePage : function() {
+        this.canvas.width = canvasWidth;
+        this.canvas.height = canvasHeight;
+        this.context = this.canvas.getContext("2d");
+        var canvasDiv = document.getElementById("canvasDiv");
+        canvasDiv.appendChild(this.canvas);
+        
+        title = new text("Swerve Pong v1 ©", canvasWidth / 2, canvasHeight / 2 - 100, "center", "white", "50px Courier");
+        description = new text("Use asdw keys for p1, arrow keys if p2", canvasWidth / 2, canvasHeight / 2 - 50, "center", "white", "20px Courier");
+        oneBox = new rectangle(100, 50, "white", canvasWidth / 2 - 140, canvasHeight / 2, "paddle");
+        twoBox = new rectangle(100, 50, "white", canvasWidth / 2 + 40, canvasHeight / 2, "paddle");
+        oneText = new text("1P", canvasWidth / 2 - 90, canvasHeight / 2 + 33, "center", "black", "30px Courier");
+        twoText = new text("2P", canvasWidth / 2 + 90, canvasHeight / 2 + 33, "center", "black", "30px Courier");
+        
+        title.show();
+        description.show();
+        oneBox.update();
+        twoBox.update();
+        oneText.show();
+        twoText.show();
+
+        window.addEventListener('mousedown', function (e) {
+            // myGameArea.mouseX = e.pageX;
+            // myGameArea.mouseY = e.pageY;
+            // context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            if ((e.pageX > canvasWidth / 2 - 140) && (e.pageX < canvasWidth / 2 - 40) && (e.pageY > canvasHeight / 2) && (e.pageY < canvasHeight / 2 + 50)) {
+                // this.document.write(myGameArea.canvas.width);
+                // this.context.clearRect(0, 0, myGameArea.canvas.width, myGameArea.canvas.height);
+                myGameArea.players = 1;
+                loadGame();
+            } else if ((e.pageX > canvasWidth / 2 + 40) && (e.pageX < canvasWidth / 2 + 140) && (e.pageY > canvasHeight / 2) && (e.pageY < canvasHeight / 2 + 50)) {
+                myGameArea.players = 2;
+                loadGame();
+                // this.document.write(myGameArea.players);
+            }
+        })
+        window.addEventListener('mouseup', function (e) {
+            myGameArea.mouseX = false;
+            myGameArea.mouseY = false;
+        })
+        // window.addEventListener('touchstart', function (e) {
+        //     myGameArea.mouseX = e.pageX;
+        //     myGameArea.mouseY = e.pageY;
+        // })
+        // window.addEventListener('touchend', function (e) {
+        //     myGameArea.mouseX = false;
+        //     myGameArea.mouseY = false;
+        // })
+    },
     launch : function() {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
@@ -119,17 +163,21 @@ function score(x, y, player) {
     }
 }
 
-function text(text, x, y) {
+function text(text, x, y, align, color, font) {
     this.text = text;
     this.x = x;
     this.y = y;
+    this.align = align;
+    this.color = color;
+    this.font = font;
     this.show = function() {
         context = myGameArea.context;
-        context.fillStyle = "white";
-        context.font =  "30px Consolas";
-        context.textAlign = "left";
+        context.fillStyle = this.color;
+        context.font =  this.font;
+        context.textAlign = this.align;
         context.fillText(this.text, this.x, this.y);
     }
+    
 }
 
 function moveUp() {
@@ -214,7 +262,9 @@ function updateGameArea() {
         pongBall.vy = -pongBall.vy;
     }
 
-    paddle2.vy = 2 * Math.sign((pongBall.y + pongBallHeight / 2) - (paddle2.y + paddleHeight / 2));
+    if (myGameArea.players == 2) {
+        paddle2.vy = 2 * Math.sign((pongBall.y + pongBallHeight / 2) - (paddle2.y + paddleHeight / 2));
+    }
 
     pongBall.newAngle();
     pongBall.newPos();    
