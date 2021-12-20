@@ -9,11 +9,22 @@ let pongBallHeight = 30;
 let paddleHeight = 90;
 let paddleWidth = 10;
 
+function preGame() {
+    title = new score(canvasWidth / 2 - 40, 40, 1);
+    description = new score(canvasWidth / 2 + 40, 40, 2);
+    onebox = new rectangle(2, canvasHeight, "white", canvasWidth / 2, 0, "line");
+    twoBox = new rectangle(2, canvasHeight, "white", canvasWidth / 2, 0, "line");
+    onebox = new text(canvasWidth / 2 + 40, 40, 2);
+    twoBox = new text(canvasWidth / 2 + 40, 40, 2);
+}
+
 function loadGame() {
     pongBall = new rectangle(pongBallHeight, pongBallWidth, "white", canvasWidth / 2, canvasHeight / 2 - pongBallHeight / 2, "ball");
     paddle1 = new rectangle(paddleWidth, paddleHeight, "white", 10, canvasHeight / 2 - paddleHeight / 2, "paddle");
     paddle2 = new rectangle(paddleWidth, paddleHeight, "white", canvasWidth - 10 - paddleWidth, canvasHeight / 2 - paddleHeight / 2, "paddle");
     midLine = new rectangle(2, canvasHeight, "white", canvasWidth / 2, 0, "line");
+    p1Score = new score(canvasWidth / 2 - 40, 40, 1);
+    p2Score = new score(canvasWidth / 2 + 40, 40, 2);
     myGameArea.launch();
 }
 
@@ -40,6 +51,9 @@ var myGameArea = {
     },
     stop: function() {
         clearInterval(this.interval);
+        this.context.fillStyle = "white";
+        this.context.font = "30px Consolas"
+        this.context.fillText("Yeee", 100, 10);
     }
 }
 
@@ -83,12 +97,38 @@ function rectangle(width, height, color, x, y, type) {
     }
 }
 
-function score(width, height, color, x, y) {
-    this.update() = function() {
+function score(x, y, player) {
+    this.points = 0;
+    this.x = x;
+    this.y = y;
+    this.player = player;
+    this.goal = function() {
+        this.points++;
+    }
+    this.update = function() {
         context = myGameArea.context;
-        context.font = width + " " + height;
-        context.fillStyle = color;
-        context.fillTest()
+        context.fillStyle = "white";
+        context.font =  "30px Consolas";
+        if (player == 1) {
+            context.textAlign = "right";
+            context.fillText(this.points.toString(), this.x, this.y);
+        } else {
+            context.textAlign = "left";
+            context.fillText(this.points.toString(), this.x, this.y);
+        }
+    }
+}
+
+function text(text, x, y) {
+    this.text = text;
+    this.x = x;
+    this.y = y;
+    this.show = function() {
+        context = myGameArea.context;
+        context.fillStyle = "white";
+        context.font =  "30px Consolas";
+        context.textAlign = "left";
+        context.fillText(this.text, this.x, this.y);
     }
 }
 
@@ -123,8 +163,11 @@ function updateGameArea() {
     if (pongBall.x + pongBallWidth > canvasWidth) {
         // myGameArea.stop();
         pongBall.vx = -pongBall.vx;
+        p1Score.goal();
     } else if (pongBall.x < 0) {
-        myGameArea.stop();
+        // myGameArea.stop();
+        pongBall.vx = -pongBall.vx;
+        p2Score.goal();
     } else if ((pongBall.x <= paddle1.x + paddle1.width) && (pongBall.x > paddle1.x - paddle1.width)) {
         let hitPaddle1 = false;
         if ((pongBall.y + pongBallHeight) > paddle1.y) {
@@ -171,7 +214,7 @@ function updateGameArea() {
         pongBall.vy = -pongBall.vy;
     }
 
-    // paddle2.vy = 2 * Math.sign((pongBall.y + pongBallHeight / 2) - (paddle2.y + paddleHeight / 2));
+    paddle2.vy = 2 * Math.sign((pongBall.y + pongBallHeight / 2) - (paddle2.y + paddleHeight / 2));
 
     pongBall.newAngle();
     pongBall.newPos();    
@@ -181,4 +224,6 @@ function updateGameArea() {
     paddle2.newPos();
     paddle2.update();
     midLine.update();
+    p1Score.update();
+    p2Score.update();
 }
