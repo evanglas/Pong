@@ -8,9 +8,13 @@ let pongBallWidth = 30;
 let pongBallHeight = 30;
 let paddleHeight = 90;
 let paddleWidth = 10;
+let iter = 0;
+let myInterval;
 
-function preGame() {
-    myGameArea.homePage();
+function preGame(winner = 0) {
+
+    iter = 0;
+    myGameArea.homePage(winner);
 }
 
 function loadGame() {
@@ -25,7 +29,7 @@ function loadGame() {
 
 var myGameArea = {
     canvas : document.createElement("canvas"),
-    homePage : function() {
+    homePage : function(winner = 0) {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
         this.context = this.canvas.getContext("2d");
@@ -33,12 +37,17 @@ var myGameArea = {
         canvasDiv.appendChild(this.canvas);
         
         title = new text("Swerve Pong v1 ©", canvasWidth / 2, canvasHeight / 2 - 100, "center", "white", "50px Courier");
-        description = new text("Use asdw keys for p1, arrow keys if p2", canvasWidth / 2, canvasHeight / 2 - 50, "center", "white", "20px Courier");
+        description = new text("Use asdw keys for p1, arrow keys if p2. First to 11 wins.", canvasWidth / 2, canvasHeight / 2 - 50, "center", "white", "20px Courier");
         oneBox = new rectangle(100, 50, "white", canvasWidth / 2 - 140, canvasHeight / 2, "paddle");
         twoBox = new rectangle(100, 50, "white", canvasWidth / 2 + 40, canvasHeight / 2, "paddle");
         oneText = new text("1P", canvasWidth / 2 - 90, canvasHeight / 2 + 33, "center", "black", "30px Courier");
         twoText = new text("2P", canvasWidth / 2 + 90, canvasHeight / 2 + 33, "center", "black", "30px Courier");
         
+        if (winner != 0) {
+            winnerText = new text("Player " + winner + " wins!", canvasWidth / 2, canvasHeight / 2 + 150, "center", "red", "60px Courier");
+            winnerText.show();
+        }
+
         title.show();
         description.show();
         oneBox.update();
@@ -54,9 +63,11 @@ var myGameArea = {
                 // this.document.write(myGameArea.canvas.width);
                 // this.context.clearRect(0, 0, myGameArea.canvas.width, myGameArea.canvas.height);
                 myGameArea.players = 1;
+                this.removeEventListener('mousedown', arguments.callee);
                 loadGame();
             } else if ((e.pageX > canvasWidth / 2 + 40) && (e.pageX < canvasWidth / 2 + 140) && (e.pageY > canvasHeight / 2) && (e.pageY < canvasHeight / 2 + 50)) {
                 myGameArea.players = 2;
+                this.removeEventListener('mousedown', arguments.callee);
                 loadGame();
                 // this.document.write(myGameArea.players);
             }
@@ -74,14 +85,14 @@ var myGameArea = {
         //     myGameArea.mouseY = false;
         // })
     },
-    launch : function() {
+    launch: function() {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
         this.context = this.canvas.getContext("2d");
         var canvasDiv = document.getElementById("canvasDiv");
         canvasDiv.appendChild(this.canvas);
         // document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        this.interval = setInterval(updateGameArea, 20);
+        myInterval = setInterval(updateGameArea, 20);
         window.addEventListener('keydown', function (e) {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = (e.type == "keydown");
@@ -94,10 +105,14 @@ var myGameArea = {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
     stop: function() {
-        clearInterval(this.interval);
-        this.context.fillStyle = "white";
-        this.context.font = "30px Consolas"
-        this.context.fillText("Yeee", 100, 10);
+        clearInterval(myInterval);
+    },
+    reset: function(winner) {
+        this.clear();
+        clearInterval(myInterval);
+        preGame(winner);
+        // window.removeEventListener('keydown');
+        // window.removeEventListener('keyup');
     }
 }
 
@@ -192,6 +207,10 @@ function moveUp() {
 
 function updateGameArea() {
     myGameArea.clear();
+    iter++;
+    if (iter % 50 == 0) {
+        console.log(iter / 50);
+    }
     paddle1.vx = 0;
     paddle1.vy = 0;
 
@@ -221,13 +240,13 @@ function updateGameArea() {
         if ((pongBall.y + pongBallHeight) > paddle1.y) {
             if ((pongBall.y + pongBallHeight / 2) < paddle1.y + paddleHeight / 3) {
                 hitPaddle1 = true;
-                pongBall.vy = pongBall.vy - 1;
+                pongBall.vy = pongBall.vy - 2;
             } else if ((pongBall.y + pongBallHeight / 2) < paddle1.y + 2 * paddleHeight / 3) {
                 hitPaddle1 = true;
                 pongBall.vy = pongBall.vy;
             } else if (pongBall.y < paddle1.y + paddleHeight) {
                 hitPaddle1 = true;
-                pongBall.vy = pongBall.vy + 1;
+                pongBall.vy = pongBall.vy + 2;
             }
         }
         if (hitPaddle1) {
@@ -240,18 +259,20 @@ function updateGameArea() {
         if ((pongBall.y + pongBallHeight) > paddle2.y) {
             if ((pongBall.y + pongBallHeight / 2) < paddle2.y + paddleHeight / 3) {
                 hitPaddle2 = true;
-                pongBall.vy = pongBall.vy - 1;
+                pongBall.vy = pongBall.vy - 2;
             } else if ((pongBall.y + pongBallHeight / 2) < paddle2.y + 2 * paddleHeight / 3) {
                 hitPaddle2 = true;
                 pongBall.vy = pongBall.vy;
             } else if (pongBall.y < paddle2.y + paddleHeight) {
                 hitPaddle2 = true;
-                pongBall.vy = pongBall.vy + 1;
+                pongBall.vy = pongBall.vy + 2;
             }
         }
         if (hitPaddle2) {
+            if (myGameArea.players == 2) {
+                paddle2.vx = 3;
+            }
             pongBall.vx = -pongBall.vx;
-            paddle2.vx = 3;
             pongBall.angularVelo = pongBall.angularVelo + paddle2.vy * Math.PI / 360;
         }
     }
@@ -262,8 +283,8 @@ function updateGameArea() {
         pongBall.vy = -pongBall.vy;
     }
 
-    if (myGameArea.players == 2) {
-        paddle2.vy = 2 * Math.sign((pongBall.y + pongBallHeight / 2) - (paddle2.y + paddleHeight / 2));
+    if (myGameArea.players == 1) {
+        paddle2.vy = 3 * Math.sign((pongBall.y + pongBallHeight / 2) - (paddle2.y + paddleHeight / 2));
     }
 
     pongBall.newAngle();
@@ -276,4 +297,11 @@ function updateGameArea() {
     midLine.update();
     p1Score.update();
     p2Score.update();
+
+    if (p1Score.points == 11) {
+        myGameArea.reset(1);
+    } else if (p2Score.points == 11) {
+        myGameArea.reset(2);
+    }
+
 }
